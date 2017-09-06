@@ -40,5 +40,8 @@ func TestTime(t *testing.T) {
 func ExampleTime() {
 	t := time.Now().Add(-time.Hour)
 	fmt.Println(elapsed.Time(t))
+	t = time.Now().Add(-time.Hour * 24 * 3)
+	fmt.Println(elapsed.Time(t))
 	// Output: 1 hour ago
+	// 3 days ago
 }

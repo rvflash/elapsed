@@ -5,7 +5,7 @@
 [![Code Coverage](https://img.shields.io/codecov/c/github/rvflash/elapsed.svg)](http://codecov.io/github/rvflash/elapsed?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/rvflash/elapsed)](https://goreportcard.com/report/github.com/rvflash/elapsed)
 
-Golang package to return the elapsed time since a given datetime in a human readable format.
+Golang package to return the elapsed time since a given time in a human readable format.
 
 
 ### Installation
@@ -20,4 +20,8 @@ $ go get -u github.com/rvflash/elapsed
 t := time.Now().Add(-time.Hour)
 fmt.Println(elapsed.Time(t))
 // Output: 1 hour ago
+
+t = time.Now().Add(-time.Hour * 24 * 3)
+fmt.Println(elapsed.Time(t))
+// Output:  3 days ago
 ```
