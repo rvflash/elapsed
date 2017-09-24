@@ -42,6 +42,9 @@ func ExampleTime() {
 	fmt.Println(elapsed.Time(t))
 	t = time.Now().Add(-time.Hour * 24 * 3)
 	fmt.Println(elapsed.Time(t))
+	t, _ = time.Parse("2006-02-01", "2049-08-19")
+	fmt.Println(elapsed.Time(t))
 	// Output: 1 hour ago
 	// 3 days ago
+	// not yet
 }

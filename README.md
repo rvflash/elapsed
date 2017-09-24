@@ -24,4 +24,8 @@ fmt.Println(elapsed.Time(t))
 t = time.Now().Add(-time.Hour * 24 * 3)
 fmt.Println(elapsed.Time(t))
 // Output:  3 days ago
+
+t, _ = time.Parse("2006-02-01", "2049-08-19")
+fmt.Println(elapsed.Time(t))
+// Output: not yet
 ```
