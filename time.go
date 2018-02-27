@@ -1,35 +1,121 @@
-// Copyright (c) 2017 Hervé Gouchet. All rights reserved.
+// Copyright (c) 2017-2018 Hervé Gouchet. All rights reserved.
 // Use of this source code is governed by the MIT License
 // that can be found in the LICENSE file.
 
+// Package elapsed return the elapsed time since a given time in a human readable format.
 package elapsed
 
 import (
+	"errors"
 	"fmt"
 	"math"
+	"strings"
 	"time"
 )
 
-// Texts to be translated if necessary.
-var (
-	NotYet     = `not yet`
-	JustNow    = `just now`
-	LastMinute = `1 minute ago`
-	Minutes    = `%d minutes ago`
-	LastHour   = `1 hour ago`
-	Hours      = `%d hours ago`
-	Yesterday  = `Yesterday`
-	Days       = `%d days ago`
-	Weeks      = `%d weeks ago`
-	Months     = `%d months ago`
-	Years      = `%d years ago`
+// TrID is the ID of a translation.
+type TrID int
+
+const (
+	// NotYet is the translation ID for the "not yet" text.
+	NotYet TrID = iota
+	// JustNow is the translation ID for the "just now" text.
+	JustNow
+	// LastMinute is the translation ID for the "1 minute ago" text.
+	LastMinute
+	// Minutes is the translation ID for the "%d minutes ago" text.
+	Minutes
+	// LastHour is the translation ID for the "1 hour ago" text.
+	LastHour
+	// Hours is the translation ID for the "%d hours ago" text.
+	Hours
+	// Yesterday is the translation ID for the "yesterday" text.
+	Yesterday
+	// Days is the translation ID for the "%d days ago" text.
+	Days
+	// Weeks is the translation ID for the "`%d weeks ago" text.
+	Weeks
+	// Months is the translation ID for the "%d months ago" text.
+	Months
+	// Years is the translation ID for the "%d years ago" text.
+	Years
 )
 
+// Lists all translations by identifier.
+type Terms map[TrID]string
+
+// Lists all translations by language code.
+type Translation map[string]Terms
+
+// i18n is a map of translations by language code.
+var i18n = Translation{
+	"en": {
+		NotYet:     `not yet`,
+		JustNow:    `just now`,
+		LastMinute: `1 minute ago`,
+		Minutes:    `%d minutes ago`,
+		LastHour:   `1 hour ago`,
+		Hours:      `%d hours ago`,
+		Yesterday:  `yesterday`,
+		Days:       `%d days ago`,
+		Weeks:      `%d weeks ago`,
+		Months:     `%d months ago`,
+		Years:      `%d years ago`,
+	},
+	"fr": {
+		NotYet:     `pas encore`,
+		JustNow:    `à l'instant'`,
+		LastMinute: `il y a 1 minute`,
+		Minutes:    `il y a %d minutes`,
+		LastHour:   `il y a 1 heure`,
+		Hours:      `il y a %d heures`,
+		Yesterday:  `hier`,
+		Days:       `il y a %d jours`,
+		Weeks:      `il y a %d semaines`,
+		Months:     `il y a %d mois`,
+		Years:      `il y a %d ans`,
+	},
+}
+
+// Common errors
+var (
+	ErrExists     = errors.New("already exists")
+	ErrIncomplete = errors.New("missing translation")
+	ErrISOCode    = errors.New("invalid language code")
+)
+
+// AddTranslation adds the terms for the given language code.
+// It fails to do it if the language code already exists or
+// if it misses some translation IDs.
+func AddTranslation(lang string, tr Terms) error {
+	if lang = strings.TrimSpace(lang); lang == "" {
+		return ErrISOCode
+	}
+	if _, ok := i18n[lang]; ok {
+		return ErrExists
+	}
+	for k := range i18n["en"] {
+		if _, ok := tr[k]; !ok {
+			return ErrIncomplete
+		}
+	}
+	i18n[lang] = tr
+
+	return nil
+}
+
 // Time returns in a human readable format the elapsed time
-// since the given datetime.
+// since the given datetime in english.
+// This methods keeps the interface of the first version of the package.
 func Time(t time.Time) string {
+	return LocalTime(t, "en")
+}
+
+// LocalTime returns in a human readable format the elapsed time
+// since the given datetime using the given ISO 639-1 language code.
+func LocalTime(t time.Time, lang string) string {
 	if t.IsZero() || time.Now().Before(t) {
-		return NotYet
+		return tr(NotYet, lang)
 	}
 	diff := time.Since(t)
 	// Duration in seconds
@@ -38,24 +124,33 @@ func Time(t time.Time) string {
 	d := int(s / 86400)
 	switch {
 	case s < 60:
-		return JustNow
+		return tr(JustNow, lang)
 	case s < 120:
-		return LastMinute
+		return tr(LastMinute, lang)
 	case s < 3600:
-		return fmt.Sprintf(Minutes, int(diff.Minutes()))
+		return fmt.Sprintf(tr(Minutes, lang), int(diff.Minutes()))
 	case s < 7200:
-		return LastHour
+		return tr(LastHour, lang)
 	case s < 86400:
-		return fmt.Sprintf(Hours, int(diff.Hours()))
+		return fmt.Sprintf(tr(Hours, lang), int(diff.Hours()))
 	case d == 1:
-		return Yesterday
+		return tr(Yesterday, lang)
 	case d < 7:
-		return fmt.Sprintf(Days, d)
+		return fmt.Sprintf(tr(Days, lang), d)
 	case d < 31:
-		return fmt.Sprintf(Weeks, int(math.Ceil(float64(d)/7)))
+		return fmt.Sprintf(tr(Weeks, lang), int(math.Ceil(float64(d)/7)))
 	case d < 365:
-		return fmt.Sprintf(Months, int(math.Ceil(float64(d)/30)))
+		return fmt.Sprintf(tr(Months, lang), int(math.Ceil(float64(d)/30)))
 	default:
-		return fmt.Sprintf(Years, int(math.Ceil(float64(d)/365)))
+		return fmt.Sprintf(tr(Years, lang), int(math.Ceil(float64(d)/365)))
 	}
+}
+
+func tr(id TrID, lang string) string {
+	ltr, ok := i18n[lang]
+	if !ok {
+		// Uses the english language as fail over.
+		ltr = i18n["en"]
+	}
+	return ltr[id]
 }
