@@ -20,7 +20,7 @@ func TestAddTranslation(t *testing.T) {
 	}{
 		{lang: "", err: elapsed.ErrISOCode},
 		{lang: "fr", err: elapsed.ErrExists},
-		{lang: "de", tr: elapsed.Terms{elapsed.Yesterday: "euh"}, err: elapsed.ErrIncomplete},
+		{lang: "ru", tr: elapsed.Terms{elapsed.Yesterday: "euh"}, err: elapsed.ErrIncomplete},
 		{lang: "en-gb", tr: elapsed.Terms{
 			elapsed.NotYet:     `not yet`,
 			elapsed.JustNow:    `just now`,
@@ -62,7 +62,7 @@ func TestLocalTime(t *testing.T) {
 	}
 	for i, tt := range dt {
 		// Requests an unknown language.
-		if out := elapsed.LocalTime(tt.in, "de"); out != tt.out {
+		if out := elapsed.LocalTime(tt.in, "ru"); out != tt.out {
 			t.Errorf("%d. content mismatch for %v: exp=%q got=%q", i, tt.in, tt.out, out)
 		}
 	}
