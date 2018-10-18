@@ -2,41 +2,43 @@
 // Use of this source code is governed by the MIT License
 // that can be found in the LICENSE file.
 
-package elapsed_test
+package elapsed
 
 import (
 	"fmt"
 	"testing"
 	"time"
-
-	"github.com/rvflash/elapsed"
 )
 
 func TestAddTranslation(t *testing.T) {
 	var dt = []struct {
 		lang string
-		tr   elapsed.Terms
+		tr   Terms
 		err  error
 	}{
-		{lang: "", err: elapsed.ErrISOCode},
-		{lang: "fr", err: elapsed.ErrExists},
-		{lang: "ru", tr: elapsed.Terms{elapsed.Yesterday: "euh"}, err: elapsed.ErrIncomplete},
-		{lang: "en-gb", tr: elapsed.Terms{
-			elapsed.NotYet:     `not yet`,
-			elapsed.JustNow:    `just now`,
-			elapsed.LastMinute: `1 minute ago`,
-			elapsed.Minutes:    `%d minutes ago`,
-			elapsed.LastHour:   `1 hour ago`,
-			elapsed.Hours:      `%d hours ago`,
-			elapsed.Yesterday:  `yesterday`,
-			elapsed.Days:       `%d days ago`,
-			elapsed.Weeks:      `%d weeks ago`,
-			elapsed.Months:     `%d months ago`,
-			elapsed.Years:      `%d years ago`,
+		{lang: "", err: ErrISOCode},
+		{lang: "fr", err: ErrExists},
+		{lang: "ru", tr: Terms{Yesterday: "euh"}, err: ErrIncomplete},
+		{lang: "en-gb", tr: Terms{
+			NotYet:    `not yet`,
+			JustNow:   `just now`,
+			Minute:    `1 minute ago`,
+			Minutes:   `%d minutes ago`,
+			Hour:      `1 hour ago`,
+			Hours:     `%d hours ago`,
+			Yesterday: `yesterday`,
+			Day:       `1 day ago`,
+			Days:      `%d days ago`,
+			Week:      `1 weeks ago`,
+			Weeks:     `%d weeks ago`,
+			Month:     `1 months ago`,
+			Months:    `%d months ago`,
+			Year:      `1 years ago`,
+			Years:     `%d years ago`,
 		}},
 	}
 	for i, tt := range dt {
-		if err := elapsed.AddTranslation(tt.lang, tt.tr); err != tt.err {
+		if err := AddTranslation(tt.lang, tt.tr); err != tt.err {
 			t.Errorf("%d. error mismatch: exp=%q got=%q", i, tt.err, err)
 		}
 	}
@@ -55,14 +57,21 @@ func TestLocalTime(t *testing.T) {
 		{time.Now().Add(-time.Hour), "1 hour ago"},
 		{time.Now().Add(-time.Hour * 3), "3 hours ago"},
 		{time.Now().Add(-time.Hour * 32), "yesterday"},
+		{time.Now().Add(-time.Hour * 24 * 6), "6 days ago"},
+		{time.Now().Add(-(time.Hour * 24 * 6) - 2*time.Hour), "6 days ago"},
 		{time.Now().Add(-time.Hour * 24 * 3), "3 days ago"},
+		{time.Now().Add(-time.Hour * 24 * 7), "1 week ago"},
 		{time.Now().Add(-time.Hour * 24 * 14), "2 weeks ago"},
+		// 4 weeks == 1 month
+		{time.Now().Add(-time.Hour * 24 * 28), "1 month ago"},
 		{time.Now().Add(-time.Hour * 24 * 60), "2 months ago"},
+		// 12 months == 1 year
+		{time.Now().Add(-time.Hour * 24 * 360), "1 year ago"},
 		{time.Now().Add(-time.Hour * 24 * 365 * 3), "3 years ago"},
 	}
 	for i, tt := range dt {
 		// Requests an unknown language.
-		if out := elapsed.LocalTime(tt.in, "ru"); out != tt.out {
+		if out := LocalTime(tt.in, "ru"); out != tt.out {
 			t.Errorf("%d. content mismatch for %v: exp=%q got=%q", i, tt.in, tt.out, out)
 		}
 	}
@@ -70,16 +79,16 @@ func TestLocalTime(t *testing.T) {
 
 func ExampleTime() {
 	t := time.Now().Add(-time.Hour)
-	fmt.Println(elapsed.Time(t))
+	fmt.Println(Time(t))
 
 	t = time.Now().Add(-time.Hour * 24 * 3)
-	fmt.Println(elapsed.Time(t))
+	fmt.Println(Time(t))
 
 	t, _ = time.Parse("2006-02-01", "2049-08-19")
-	fmt.Println(elapsed.Time(t))
+	fmt.Println(Time(t))
 
 	t = time.Now().Add(-time.Hour * 24 * 3)
-	fmt.Println(elapsed.LocalTime(t, "fr"))
+	fmt.Println(LocalTime(t, "fr"))
 	// Output: 1 hour ago
 	// 3 days ago
 	// not yet
