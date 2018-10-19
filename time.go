@@ -31,8 +31,6 @@ const (
 	Hours
 	// Yesterday is the translation ID for the "yesterday" text.
 	Yesterday
-	// Day is the singular of Days
-	Day
 	// Days is the translation ID for the "%d days ago" text.
 	Days
 	// Week is the singular of Weeks
@@ -65,7 +63,6 @@ var i18n = Translation{
 		Hour:      `vor %d Stunde`,
 		Hours:     `vor %d Stunden`,
 		Yesterday: `gestern`,
-		Day:       `vor %d Tag`,
 		Days:      `vor %d Tagen`,
 		Week:      `vor %d Woche`,
 		Weeks:     `vor %d Wochen`,
@@ -82,7 +79,6 @@ var i18n = Translation{
 		Hour:      `%d hour ago`,
 		Hours:     `%d hours ago`,
 		Yesterday: `yesterday`,
-		Day:       `%d day ago`,
 		Days:      `%d days ago`,
 		Week:      `%d week ago`,
 		Weeks:     `%d weeks ago`,
@@ -99,7 +95,6 @@ var i18n = Translation{
 		Hour:      `hace %d hora`,
 		Hours:     `hace %d horas`,
 		Yesterday: `ayer`,
-		Day:       `hace %d día`,
 		Days:      `hace %d días`,
 		Week:      `hace %d semana`,
 		Weeks:     `hace %d semanas`,
@@ -116,7 +111,6 @@ var i18n = Translation{
 		Hour:      `il y a %d heure`,
 		Hours:     `il y a %d heures`,
 		Yesterday: `hier`,
-		Day:       `il y a %d jour`,
 		Days:      `il y a %d jours`,
 		Week:      `il y a %d semaine`,
 		Weeks:     `il y a %d semaines`,
@@ -133,7 +127,6 @@ var i18n = Translation{
 		Hour:      `%d ora fa`,
 		Hours:     `%d ore fa`,
 		Yesterday: `ieri`,
-		Day:       `da %d giorno`,
 		Days:      `da %d giorni`,
 		Week:      `da %d settimana`,
 		Weeks:     `da %d settimane`,
@@ -150,7 +143,6 @@ var i18n = Translation{
 		Hour:      `%d uur geleden`,
 		Hours:     `%d uren geleden`,
 		Yesterday: `gisteren`,
-		Day:       `%d dag geleden`,
 		Days:      `%d dagen geleden`,
 		Week:      `%d weke geleden`,
 		Weeks:     `%d weken geleden`,
@@ -167,7 +159,6 @@ var i18n = Translation{
 		Hour:      `%d godzinę temu`,
 		Hours:     `%d godziny temu`,
 		Yesterday: `wczoraj`,
-		Day:       `%d dzień temu`,
 		Days:      `%d dni temu`,
 		Week:      `%d tydzień temu`,
 		Weeks:     `%d tygodnie temu`,
@@ -216,7 +207,7 @@ func Time(t time.Time) string {
 // since the given datetime using the given ISO 639-1 language code.
 func LocalTime(t time.Time, lang string) string {
 	if t.IsZero() || time.Now().Before(t) {
-		return tr(NotYet, lang, -1)
+		return tr(NotYet, lang)
 	}
 	diff := time.Since(t)
 	// Duration in seconds
@@ -225,76 +216,59 @@ func LocalTime(t time.Time, lang string) string {
 	d := int(s / 86400)
 	switch {
 	case s < 60:
-		return tr(JustNow, lang, -1)
+		return tr(JustNow, lang)
 	case s < 3600:
 		min := int(diff.Minutes())
-		return fmt.Sprintf(tr(Minutes, lang, min), min)
+		return fmt.Sprintf(tr(changeIfSing(Minutes, min), lang), min)
 	case s < 86400:
 		hours := int(diff.Hours())
-		return fmt.Sprintf(tr(Hours, lang, hours), hours)
+		return fmt.Sprintf(tr(changeIfSing(Hours, hours), lang), hours)
 	case d == 1:
-		return tr(Yesterday, lang, -1)
+		return tr(Yesterday, lang)
 	case d < 7:
-		return fmt.Sprintf(tr(Days, lang, d), d)
+		return fmt.Sprintf(tr(changeIfSing(Days, d), lang), d)
 	case d < 31:
 		nbWeek := int(math.Ceil(float64(d) / 7))
 		if nbWeek < 4 {
-			return fmt.Sprintf(tr(Weeks, lang, nbWeek), nbWeek)
+			return fmt.Sprintf(tr(changeIfSing(Weeks, nbWeek), lang), nbWeek)
 		}
 		fallthrough
 	case d < 365:
 		nbMonth := int(math.Ceil(float64(d) / 30))
 		if nbMonth < 12 {
-			return fmt.Sprintf(tr(Months, lang, nbMonth), nbMonth)
+			return fmt.Sprintf(tr(changeIfSing(Months, nbMonth), lang), nbMonth)
 		}
 		fallthrough
 	default:
 		nbYear := int(math.Ceil(float64(d) / 365))
-		return fmt.Sprintf(tr(Years, lang, nbYear), nbYear)
+		return fmt.Sprintf(tr(changeIfSing(Years, nbYear), lang), nbYear)
 	}
 }
 
-func tr(id TrID, lang string, nb int) string {
+func tr(id TrID, lang string) string {
 	ltr, ok := i18n[lang]
 	if !ok {
 		// Uses the english language as fail over.
 		ltr = i18n["en"]
 	}
-	return ltr[changeIfSing(id, nb)]
+	return ltr[id]
 }
 
 func changeIfSing(id TrID, nb int) TrID {
+	if nb != 1 {
+		return id
+	}
 	switch id {
 	case Minutes:
-		if nb == 1 {
-			return Minute
-		}
-		return Minutes
+		return Minute
 	case Hours:
-		if nb == 1 {
-			return Hour
-		}
-		return Hours
+		return Hour
 	case Months:
-		if nb == 1 {
-			return Month
-		}
-		return Months
+		return Month
 	case Weeks:
-		if nb == 1 {
-			return Week
-		}
-		return Weeks
-	case Days:
-		if nb == 1 {
-			return Day
-		}
-		return Days
+		return Week
 	case Years:
-		if nb == 1 {
-			return Year
-		}
-		return Years
+		return Year
 	default:
 		return id
 	}

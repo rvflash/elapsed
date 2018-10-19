@@ -27,7 +27,6 @@ func TestAddTranslation(t *testing.T) {
 			Hour:      `1 hour ago`,
 			Hours:     `%d hours ago`,
 			Yesterday: `yesterday`,
-			Day:       `1 day ago`,
 			Days:      `%d days ago`,
 			Week:      `1 weeks ago`,
 			Weeks:     `%d weeks ago`,
