@@ -167,6 +167,22 @@ var i18n = Translation{
 		Year:      `%d rok temu`,
 		Years:     `%d lata temu`,
 	},
+	"zh": {
+		NotYet:    `未到`,
+		JustNow:   `刚刚`,
+		Minute:    `%d 分钟前`,
+		Minutes:   `%d 分钟前`,
+		Hour:      `%d 小时前`,
+		Hours:     `%d 小时前`,
+		Yesterday: `昨天`,
+		Days:      `%d 天前`,
+		Week:      `%d 周前`,
+		Weeks:     `%d 周前`,
+		Month:     `%d 个月前`,
+		Months:    `%d 个月前`,
+		Year:      `%d 年前`,
+		Years:     `%d 年前`,
+	},
 }
 
 // Common errors
