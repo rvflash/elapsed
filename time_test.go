@@ -5,10 +5,13 @@
 package elapsed
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 	"time"
 )
+
+const unknown = "sq"
 
 func TestAddTranslation(t *testing.T) {
 	var dt = []struct {
@@ -18,7 +21,7 @@ func TestAddTranslation(t *testing.T) {
 	}{
 		{lang: "", err: ErrISOCode},
 		{lang: "fr", err: ErrExists},
-		{lang: "ru", tr: Terms{Yesterday: "euh"}, err: ErrIncomplete},
+		{lang: unknown, tr: Terms{Yesterday: "euh"}, err: ErrIncomplete},
 		{lang: "en-gb", tr: Terms{
 			NotYet:    `not yet`,
 			JustNow:   `just now`,
@@ -37,7 +40,7 @@ func TestAddTranslation(t *testing.T) {
 		}},
 	}
 	for i, tt := range dt {
-		if err := AddTranslation(tt.lang, tt.tr); err != tt.err {
+		if err := AddTranslation(tt.lang, tt.tr); !errors.Is(err, tt.err) {
 			t.Errorf("%d. error mismatch: exp=%q got=%q", i, tt.err, err)
 		}
 	}
@@ -70,7 +73,7 @@ func TestLocalTime(t *testing.T) {
 	}
 	for i, tt := range dt {
 		// Requests an unknown language.
-		if out := LocalTime(tt.in, "ru"); out != tt.out {
+		if out := LocalTime(tt.in, unknown); out != tt.out {
 			t.Errorf("%d. content mismatch for %v: exp=%q got=%q", i, tt.in, tt.out, out)
 		}
 	}
@@ -83,7 +86,7 @@ func ExampleTime() {
 	t = time.Now().Add(-time.Hour * 24 * 3)
 	fmt.Println(Time(t))
 
-	t, _ = time.Parse("2006-02-01", "2049-08-19")
+	t, _ = time.Parse(time.DateOnly, "2049-08-19")
 	fmt.Println(Time(t))
 
 	t = time.Now().Add(-time.Hour * 24 * 3)
