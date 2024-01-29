@@ -1,11 +1,12 @@
 # Elapsed time
 
 [![GoDoc](https://godoc.org/github.com/rvflash/elapsed?status.svg)](https://godoc.org/github.com/rvflash/elapsed)
-[![Build Status](https://img.shields.io/travis/rvflash/elapsed.svg)](https://travis-ci.org/rvflash/elapsed)
-[![Code Coverage](https://img.shields.io/codecov/c/github/rvflash/elapsed.svg)](http://codecov.io/github/rvflash/elapsed?branch=master)
-[![Go Report Card](https://goreportcard.com/badge/github.com/rvflash/elapsed)](https://goreportcard.com/report/github.com/rvflash/elapsed)
+[![Build Status](https://github.com/rvflash/elapsed/workflows/build/badge.svg)](https://github.com/rvflash/elapsed/actions?workflow=build)
+[![Code Coverage](https://codecov.io/gh/rvflash/elapsed/branch/master/graph/badge.svg)](https://codecov.io/gh/rvflash/elapsed)
+[![Go Report Card](https://goreportcard.com/badge/github.com/rvflash/elapsed?)](https://goreportcard.com/report/github.com/rvflash/elapsed)
 
-Golang package to return the elapsed time since a given time in a human readable format.
+
+Golang package to return the elapsed time since a given time in a human-readable format.
 
 
 ### Installation
