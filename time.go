@@ -176,7 +176,7 @@ var i18n = Translation{
 		Hours:     `%d uren geleden`,
 		Yesterday: `gisteren`,
 		Days:      `%d dagen geleden`,
-		Week:      `%d weke geleden`,
+		Week:      `%d week geleden`,
 		Weeks:     `%d weken geleden`,
 		Month:     `%d maand geleden`,
 		Months:    `%d maanden geleden`,
