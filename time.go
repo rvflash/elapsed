@@ -23,14 +23,20 @@ const (
 	JustNow
 	// Minute is the translation ID for the "1 minute ago" text.
 	Minute
+	// FewMinutes is the translation ID for 2-4 minutes in russian text.
+	FewMinutes
 	// Minutes is the translation ID for the "%d minutes ago" text.
 	Minutes
 	// Hour is the singular of Hours
 	Hour
+	// FewHours is the translation ID for 2-4 hours in russian text.
+	FewHours
 	// Hours is the translation ID for the "%d hours ago" text.
 	Hours
 	// Yesterday is the translation ID for the "yesterday" text.
 	Yesterday
+	// FewDays is the translation ID for 2-4 days in russian text.
+	FewDays
 	// Days is the translation ID for the "%d days ago" text.
 	Days
 	// Week is the singular of Weeks
@@ -39,10 +45,14 @@ const (
 	Weeks
 	// Month is the singular of Months
 	Month
+	// FewMonths is the translation ID for 2-4 months in russian text.
+	FewMonths
 	// Months is the translation ID for the "%d months ago" text.
 	Months
 	// Year is the singular
 	Year
+	// FewYears is the translation ID for 2-4 years in russian text.
+	FewYears
 	// Years is the translation ID for the "%d years ago" text.
 	Years
 )
@@ -120,20 +130,25 @@ var i18n = Translation{
 		Years:     `há %d anos`,
 	},
 	"ru": {
-		NotYet:    `еще нет`,
-		JustNow:   `сейчас`,
-		Minute:    `%d минуту назад`,
-		Minutes:   `%d минут назад`,
-		Hour:      `%d час назад`,
-		Hours:     `%d часов назад`,
-		Yesterday: `вчера`,
-		Days:      `%d дней назад`,
-		Week:      `%d неделю назад`,
-		Weeks:     `%d недели назад`,
-		Month:     `%d месяц назад`,
-		Months:    `%d месяца назад`,
-		Year:      `%d год назад`,
-		Years:     `%d года назад`,
+		NotYet:     `еще нет`,
+		JustNow:    `сейчас`,
+		Minute:     `%d минуту назад`,
+		FewMinutes: `%d минуты назад`,
+		Minutes:    `%d минут назад`,
+		Hour:       `%d час назад`,
+		FewHours:   `%d часа назад`,
+		Hours:      `%d часов назад`,
+		Yesterday:  `вчера`,
+		FewDays:    `%d дня назад`,
+		Days:       `%d дней назад`,
+		Week:       `%d неделю назад`,
+		Weeks:      `%d недели назад`,
+		Month:      `%d месяц назад`,
+		FewMonths:  `%d месяца назад`,
+		Months:     `%d месяцев назад`,
+		Year:       `%d год назад`,
+		FewYears:   `%d года назад`,
+		Years:      `%d лет назад`,
 	},
 	"fr": {
 		NotYet:    `pas encore`,
@@ -265,14 +280,31 @@ func LocalTime(t time.Time, lang string) string {
 	switch {
 	case s < 60:
 		return tr(JustNow, lang)
+	case s < 240:
+		if lang == "ru" {
+			min := int(diff.Minutes())
+			return fmt.Sprintf(tr(changeIfSing(FewMinutes, min), lang), min)
+		}
+		fallthrough
 	case s < 3600:
 		min := int(diff.Minutes())
 		return fmt.Sprintf(tr(changeIfSing(Minutes, min), lang), min)
+	case s < 14400:
+		if lang == "ru" {
+			hours := int(diff.Hours())
+			return fmt.Sprintf(tr(changeIfSing(FewHours, hours), lang), hours)
+		}
+		fallthrough
 	case s < 86400:
 		hours := int(diff.Hours())
 		return fmt.Sprintf(tr(changeIfSing(Hours, hours), lang), hours)
 	case d == 1:
 		return tr(Yesterday, lang)
+	case d < 5:
+		if lang == "ru" {
+			return fmt.Sprintf(tr(changeIfSing(FewDays, d), lang), d)
+		}
+		fallthrough
 	case d < 7:
 		return fmt.Sprintf(tr(changeIfSing(Days, d), lang), d)
 	case d < 31:
@@ -283,12 +315,18 @@ func LocalTime(t time.Time, lang string) string {
 		fallthrough
 	case d < 365:
 		nbMonth := int(math.Ceil(float64(d) / 30))
+		if nbMonth < 5 && lang == "ru" {
+			return fmt.Sprintf(tr(changeIfSing(FewMonths, nbMonth), lang), nbMonth)
+		}
 		if nbMonth < 12 {
 			return fmt.Sprintf(tr(changeIfSing(Months, nbMonth), lang), nbMonth)
 		}
 		fallthrough
 	default:
 		nbYear := int(math.Ceil(float64(d) / 365))
+		if nbYear < 5 && lang == "ru" {
+			return fmt.Sprintf(tr(changeIfSing(FewYears, nbYear), lang), nbYear)
+		}
 		return fmt.Sprintf(tr(changeIfSing(Years, nbYear), lang), nbYear)
 	}
 }
@@ -307,14 +345,22 @@ func changeIfSing(id TrID, nb int) TrID {
 		return id
 	}
 	switch id {
+	case FewMinutes:
+		return Minute
 	case Minutes:
 		return Minute
+	case FewHours:
+		return Hour
 	case Hours:
 		return Hour
-	case Months:
-		return Month
 	case Weeks:
 		return Week
+	case FewMonths:
+		return Month
+	case Months:
+		return Month
+	case FewYears:
+		return Year
 	case Years:
 		return Year
 	default:
